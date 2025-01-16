@@ -20,9 +20,15 @@ public class Article {
     @Column(length = 1000)
     private String title;
 
-    @Column (length = 10000)
+    @Column (length = 30000)
     private String summary;
 
     @Column(name = "time", columnDefinition = "TIMESTAMP") // 명시적인 컬럼 정의
     private LocalDateTime time;
+
+    @Column(length = 50)
+    private String stocks;
+
+    @Column(length = 1000)
+    private String origin_link;
 }
