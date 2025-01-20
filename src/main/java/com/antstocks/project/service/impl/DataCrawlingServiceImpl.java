@@ -37,7 +37,7 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                 try {
                     System.out.println(rank+" 크롤링 시작");
 
-                    //  yahoo크롤링
+                    // yahoo크롤링
                     String mainUrl = "https://finance.yahoo.com/quote/"+rank+"/news/";
                     // 크롤링 방지 회피를 위한 userAgent 추가
                     Document mainDoc = Jsoup.connect(mainUrl).userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
@@ -54,6 +54,9 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                             continue; // 중복된 제목은 건너뜁니다.
                         }
 
+                        if (articleTitle.startsWith("Update: ")) {
+                            continue; // 기사의 업데이트 소식은 건너뜁니다.
+                        }
 
                         // 상대 URL이 있을 경우, 절대 URL로 변환
                         String articleUrl = article.attr("href");
@@ -81,7 +84,7 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                         // title 속성을 가진 모든 a 태그 선택
                         Elements links = articleDoc.select("a[data-testid=\"ticker-container\"]");
 
-                        // title 값을 쉼표로 연결된 문자열로 저장
+                        // title 값을 쉼표로 연결된 문자열로 저장 ex) AAPL,NVDA
                         StringBuilder titles = new StringBuilder();
                         for (var link : links) {
                             if (titles.length() > 0) {
