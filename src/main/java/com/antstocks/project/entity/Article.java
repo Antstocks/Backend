@@ -20,7 +20,7 @@ public class Article {
     @Column(length = 1000)
     private String title;
 
-    @Column (length = 30000)
+    @Column (length = 50000)
     private String summary;
 
     @Column(name = "time", columnDefinition = "TIMESTAMP") // 명시적인 컬럼 정의
@@ -31,4 +31,6 @@ public class Article {
 
     @Column(length = 1000)
     private String origin_link;
+
+    private Integer score;
 }
