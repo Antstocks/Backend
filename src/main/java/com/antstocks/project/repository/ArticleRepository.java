@@ -11,5 +11,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
 
     //제목 중복 검사
-    boolean existsByTitle(String title);
+    boolean existsByoriginTitle(String title);
 }
