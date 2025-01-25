@@ -23,6 +23,9 @@ public class DataCrawlingController {
     private final DataCrawlingService dataCrawlingService;
     private final ArticleRepository articleRepository;
 
+    private final ArticleRepository articleRepository;
+    private static final Logger logger = LoggerFactory.getLogger(DataCrawlingController.class);
+
     // 생성자를 통한 의존성 주입
     public DataCrawlingController(DataCrawlingService dataCrawlingService,ArticleRepository articleRepository) {
         this.dataCrawlingService = dataCrawlingService;

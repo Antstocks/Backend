@@ -5,6 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+
+import java.util.Arrays;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -17,9 +22,11 @@ public class WebSecurityConfig {
         http
                 .securityMatcher("/api/**")  // "/api/**" 경로에만 보안 설정
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll()  // 모든 "/api/**" 요청을 인증 없이 허용
+                        .anyRequest().permitAll()// 모든 "/api/**" 요청을 인증 없이 허용
                 );
+
 
         return http.build();
     }
+
 }
