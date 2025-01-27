@@ -13,7 +13,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
 
     //제목 중복 검사
-    boolean existsByTitle(String title);
+    boolean existsByoriginTitle(String title);
 
     // 긴급 뉴스 조회
     List<BreakingNewsProjection> findTop5ByScoreGreaterThanEqual(int score, Sort sort);

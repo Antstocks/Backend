@@ -3,24 +3,17 @@ package com.antstocks.project.service.impl;
 import com.antstocks.project.entity.Article;
 import com.antstocks.project.repository.ArticleRepository;
 import com.antstocks.project.service.DataCrawlingService;
-import org.apache.logging.log4j.Logger;
+import com.antstocks.project.service.GeminiService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 // 랜덤
 import java.util.concurrent.ThreadLocalRandom;
@@ -30,7 +23,14 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
 
 
     @Autowired
-    public ArticleRepository articleRepository;
+    private final ArticleRepository articleRepository;
+    @Autowired
+    private final GeminiService geminiService;
+
+    public DataCrawlingServiceImpl(ArticleRepository articleRepository, GeminiService geminiService) {
+        this.articleRepository = articleRepository;
+        this.geminiService = geminiService;
+    }
 
     @Override
     public void parseHtml() {
@@ -53,14 +53,13 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                         // 기사 제목 추출
                         String articleTitle = article.attr("aria-label");
 
-                        if (articleRepository.existsByTitle(articleTitle)) {
+                        if (articleRepository.existsByoriginTitle(articleTitle)) {
                             continue; // 중복된 제목은 건너뜁니다.
                         }
-
+                        String originTitle = articleTitle;
                         if (articleTitle.startsWith("Update: ")) {
                             continue; // 기사의 업데이트 소식은 건너뜁니다.
                         }
-
                         // 상대 URL이 있을 경우, 절대 URL로 변환
                         String articleUrl = article.attr("href");
                         if (!articleUrl.startsWith("http")) {
@@ -112,13 +111,29 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                         // StringBuilder로 합쳐진 텍스트를 하나의 String으로 변환
                         String articleContent = contentBuilder.toString();
 
+                        System.out.println("제미나이 응답 "+ geminiService.getContents("title :" + articleTitle +"summary :" +articleContent + "번역해주고 summary는 200자 요약만 출력 해줘 출력형식은 title: 제목, summary : 내용"));
+
+                        try {
+                            String response = geminiService.getContents("title :" + articleTitle + "summary :" + articleContent + "번역해주고 summary는 200자 요약만 출력 해줘 출력형식은 title: 제목, summary : 내용");
+                            Thread.sleep(5000);
+                            String[] parts = response.split("\n");
+
+                            String title = parts[0].replace("title: ", "").trim();
+                            String summary = parts[2].replace("summary: ", "").trim();
+                            articleTitle = title;
+                            articleContent = summary;
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+
                         // 데이터 베이스 값 입력
                         Article articleEntity = new Article();
+                        articleEntity.setOriginTitle(originTitle);
                         articleEntity.setTitle(articleTitle);
                         articleEntity.setSummary(articleContent);
                         articleEntity.setTime(localDateTime);
                         articleEntity.setStocks(stocks);
-                        articleEntity.setOrigin_link(articleUrl);
+                        articleEntity.setOriginLink(articleUrl);
 
                         // 1 ~ 10 사이의 랜덤 점수 생성
                         int randomScore = ThreadLocalRandom.current().nextInt(1, 11); // 범위: [1, 11)

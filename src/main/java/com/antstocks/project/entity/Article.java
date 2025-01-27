@@ -30,7 +30,10 @@ public class Article {
     private String stocks;
 
     @Column(length = 1000)
-    private String origin_link;
+    private String originTitle;
 
-    private Integer score;
+    @Column(length = 1000)
+    private String originLink;
+
+    private  Integer score;
 }
