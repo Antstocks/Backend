@@ -1,6 +1,6 @@
 package com.antstocks.project.controller;
 
-import com.antstocks.project.entity.Article;
+import com.antstocks.project.projection.ArticleProjection.BreakingNewsProjection;
 import com.antstocks.project.repository.ArticleRepository;
 import com.antstocks.project.service.DataCrawlingService;
 import org.slf4j.Logger;
@@ -17,33 +17,19 @@ import java.util.List;
 @RequestMapping("api")
 //CORS 허용
 @CrossOrigin(origins = "http://localhost:5173")
-public class DataCrawlingController {
-
-    private final DataCrawlingService dataCrawlingService;
+public class BreakingNewsController {
     private final ArticleRepository articleRepository;
-
     private static final Logger logger = LoggerFactory.getLogger(DataCrawlingController.class);
 
     // 생성자를 통한 의존성 주입
-    public DataCrawlingController(DataCrawlingService dataCrawlingService,ArticleRepository articleRepository) {
-        this.dataCrawlingService = dataCrawlingService;
+    public BreakingNewsController(DataCrawlingService dataCrawlingService,ArticleRepository articleRepository) {
         this.articleRepository = articleRepository;
     }
 
-    // Crawling 실행 엔드포인트
-    @GetMapping("/crawling")
-    public String startCrawling() {
-        try {
-            dataCrawlingService.parseHtml();
-            return "Crawling completed successfully!";
-        } catch (Exception e) {
-            return "Crawling failed: " + e.getMessage();
-        }
-    }
-
-    @GetMapping("/allArticles")
-    public List<Article> getAllArticles() {
-        // 기사를 시간 내림차순으로 select
-        return articleRepository.findAll(Sort.by(Sort.Order.desc("time")));
+    // 긴급뉴스 엔드포인트
+    @GetMapping("/breakingNews")
+    public List<BreakingNewsProjection> getBreakingNews() {
+        // 뉴스 점수가 7점 이상인 기사를 시간 내림차순으로 select
+        return articleRepository.findTop5ByScoreGreaterThanEqual(7, Sort.by(Sort.Order.desc("time")));
     }
 }

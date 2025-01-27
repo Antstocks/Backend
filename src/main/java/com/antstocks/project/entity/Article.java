@@ -34,4 +34,6 @@ public class Article {
 
     @Column(length = 1000)
     private String originLink;
+
+    private  Integer score;
 }

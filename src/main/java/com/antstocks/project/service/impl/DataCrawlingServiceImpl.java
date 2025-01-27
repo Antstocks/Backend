@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+// 랜덤
+import java.util.concurrent.ThreadLocalRandom;
+
 @Service
 public class DataCrawlingServiceImpl implements DataCrawlingService {
 
@@ -32,7 +35,7 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
     @Override
     public void parseHtml() {
 
-            String sp500 [] = {"AAPL","NVDA","MSFT","GOOG","GOOGL","AMZN","META","TSLA","AVGO","BRK-B"};
+            String sp500 [] = {"AAPL","NVDA"}; // ,"MSFT","GOOG","GOOGL","AMZN","META","TSLA","AVGO","BRK-B"
             for (String rank : sp500) {
                 try {
                     System.out.println(rank+" 크롤링 시작");
@@ -131,6 +134,10 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                         articleEntity.setTime(localDateTime);
                         articleEntity.setStocks(stocks);
                         articleEntity.setOriginLink(articleUrl);
+
+                        // 1 ~ 10 사이의 랜덤 점수 생성
+                        int randomScore = ThreadLocalRandom.current().nextInt(1, 11); // 범위: [1, 11)
+                        articleEntity.setScore(randomScore);
 
                         // 데이터베이스에 저장
                         articleRepository.save(articleEntity);
