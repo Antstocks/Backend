@@ -30,6 +30,6 @@ public class BreakingNewsController {
     @GetMapping("/breakingNews")
     public List<BreakingNewsProjection> getBreakingNews() {
         // 뉴스 점수가 7점 이상인 기사를 시간 내림차순으로 select
-        return articleRepository.findTop5ByScoreGreaterThanEqual(7, Sort.by(Sort.Order.desc("time")));
+        return articleRepository.findTop5ByScoreGreaterThanEqual(8, Sort.by(Sort.Order.desc("time")));
     }
 }
