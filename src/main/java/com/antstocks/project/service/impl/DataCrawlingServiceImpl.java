@@ -1,5 +1,6 @@
 package com.antstocks.project.service.impl;
 
+import com.antstocks.project.controller.SseController;
 import com.antstocks.project.entity.Article;
 import com.antstocks.project.repository.ArticleRepository;
 import com.antstocks.project.service.DataCrawlingService;
@@ -9,6 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,15 +29,21 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
     @Autowired
     private final GeminiService geminiService;
 
-    public DataCrawlingServiceImpl(ArticleRepository articleRepository, GeminiService geminiService) {
+    @Autowired
+    private SseController sseController;
+    private int lastArticleCount = 0; // 이전 기사 갯수 저장
+
+    public DataCrawlingServiceImpl(ArticleRepository articleRepository, GeminiService geminiService,SseController sseController) {
         this.articleRepository = articleRepository;
         this.geminiService = geminiService;
+        this.sseController = sseController;
     }
 
     @Override
+    @Scheduled(fixedRate = 600000)
     public void parseHtml() {
 
-            String sp500 [] = {"AAPL","NVDA"}; // ,"MSFT","GOOG","GOOGL","AMZN","META","TSLA","AVGO","BRK-B"
+        String sp500 [] = {"AAPL","NVDA","MSFT","GOOG","GOOGL","AMZN","META","TSLA","AVGO","BRK-B"};
             for (String rank : sp500) {
                 try {
                     System.out.println(rank+" 크롤링 시작");
@@ -111,7 +119,7 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                         // StringBuilder로 합쳐진 텍스트를 하나의 String으로 변환
                         String articleContent = contentBuilder.toString();
 
-                        System.out.println("제미나이 응답 "+ geminiService.getContents("title :" + articleTitle +"summary :" +articleContent + "번역해주고 summary는 200자 요약만 출력 해줘 출력형식은 title: 제목, summary : 내용"));
+
 
                         try {
                             String response = geminiService.getContents("title :" + articleTitle + "summary :" + articleContent + "번역해주고 summary는 200자 요약만 출력 해줘 출력형식은 title: 제목, summary : 내용");
@@ -120,6 +128,8 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
 
                             String title = parts[0].replace("title: ", "").trim();
                             String summary = parts[2].replace("summary: ", "").trim();
+                            System.out.println("title: " +title);
+                            System.out.println("summary: " +summary);
                             articleTitle = title;
                             articleContent = summary;
                         } catch (InterruptedException e) {
@@ -150,5 +160,19 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                 System.out.println(rank+" 크롤링 완료");
             }
         System.out.println("크롤링 전체 완료");
+
+        int currentCount = (int) articleRepository.count();
+        int updateCount = currentCount - lastArticleCount;
+
+        // 만약 추가된 기사가 있으면 웹소켓 통신
+        if (updateCount > 0) {
+            sseController.sendNotification(updateCount + "개의 새로운 기사가 있습니다.");
+        }
+
+        // 마지막 기사 갯수 저장
+        lastArticleCount = currentCount;
+
+
+
     }
 }
