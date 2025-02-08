@@ -5,6 +5,8 @@ import com.antstocks.project.service.Top10StockMentionsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +19,10 @@ public class Top10StockMentionsServiceImpl implements Top10StockMentionsService 
 
     @Override
     public List<Map.Entry<String, Integer>> Top10StockMentions() {
-        List<String> stockLists = articleRepository.findAllStocks();
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.plusDays(1).atStartOfDay();
+        List<String> stockLists = articleRepository.findAllStocksToday(startOfDay, endOfDay);
         Map<String, Integer> stockCount = new HashMap<>();
 
         for (String symbols : stockLists) {
