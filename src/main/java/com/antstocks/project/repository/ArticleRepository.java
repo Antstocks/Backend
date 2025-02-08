@@ -4,6 +4,7 @@ import com.antstocks.project.entity.Article;
 import com.antstocks.project.projection.ArticleProjection.BreakingNewsProjection;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,4 +18,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     // 긴급 뉴스 조회
     List<BreakingNewsProjection> findTop5ByScoreGreaterThanEqual(int score, Sort sort);
+
+    // 언급된 상위 10개 종목 조회
+    @Query("SELECT stocks FROM Article")
+    List<String> findAllStocks();
 }

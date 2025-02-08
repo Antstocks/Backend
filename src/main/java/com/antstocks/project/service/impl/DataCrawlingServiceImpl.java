@@ -5,6 +5,7 @@ import com.antstocks.project.entity.Article;
 import com.antstocks.project.repository.ArticleRepository;
 import com.antstocks.project.service.DataCrawlingService;
 import com.antstocks.project.service.GeminiService;
+import com.antstocks.project.service.Top10StockMentionsService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -31,6 +32,9 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
 
     @Autowired
     private SseController sseController;
+
+    @Autowired
+    private Top10StockMentionsService top10StockMentionsService;
     private int lastArticleCount = 0; // 이전 기사 갯수 저장
 
     public DataCrawlingServiceImpl(ArticleRepository articleRepository, GeminiService geminiService,SseController sseController) {
@@ -44,6 +48,7 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
     public void parseHtml() {
 
         String sp500 [] = {"AAPL","NVDA","MSFT","GOOG","GOOGL","AMZN","META","TSLA","AVGO","BRK-B"};
+        //String sp500 [] = {"AAPL"};
             for (String rank : sp500) {
                 try {
                     System.out.println(rank+" 크롤링 시작");
@@ -84,6 +89,7 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                         postDate = postDate.replace("Z", "");
                         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
                         LocalDateTime localDateTime = LocalDateTime.parse(postDate, formatter);
+                        dateTime = localDateTime.plusHours(9);
 
                         // div.article_WYSIWYG__O0uhw 내부의 p 태그들 추출
                         Elements paragraphs = articleDoc.select("p.yf-1pe5jgt");
@@ -141,7 +147,7 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
                         articleEntity.setOriginTitle(originTitle);
                         articleEntity.setTitle(articleTitle);
                         articleEntity.setSummary(articleContent);
-                        articleEntity.setTime(localDateTime);
+                        articleEntity.setTime(dateTime);
                         articleEntity.setStocks(stocks);
                         articleEntity.setOriginLink(articleUrl);
 
@@ -161,12 +167,13 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
             }
         System.out.println("크롤링 전체 완료");
 
+
         int currentCount = (int) articleRepository.count();
         int updateCount = currentCount - lastArticleCount;
 
         // 만약 추가된 기사가 있으면 웹소켓 통신
         if (updateCount > 0) {
-            sseController.sendNotification(updateCount + "개의 새로운 기사가 있습니다.");
+            sseController.sendTopStocks(updateCount,top10StockMentionsService.Top10StockMentions());
         }
 
         // 마지막 기사 갯수 저장

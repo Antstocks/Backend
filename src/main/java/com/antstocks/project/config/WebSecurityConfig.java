@@ -20,7 +20,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/**")  // "/api/**" 경로에만 보안 설정
+                .securityMatcher("/api/**", "/sse/**")  // "/api/**","/sse/**" 경로에만 보안 설정
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().permitAll()// 모든 "/api/**" 요청을 인증 없이 허용
                 );
