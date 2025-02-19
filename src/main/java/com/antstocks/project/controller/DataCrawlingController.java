@@ -30,16 +30,6 @@ public class DataCrawlingController {
         this.articleRepository = articleRepository;
     }
 
-    // Crawling 실행 엔드포인트
-    @GetMapping("/crawling")
-    public String startCrawling() {
-        try {
-            dataCrawlingService.parseHtml();
-            return "Crawling completed successfully!";
-        } catch (Exception e) {
-            return "Crawling failed: " + e.getMessage();
-        }
-    }
 
     @GetMapping("/allArticles")
     public List<Article> getAllArticles() {

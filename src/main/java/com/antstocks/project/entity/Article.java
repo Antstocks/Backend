@@ -26,7 +26,7 @@ public class Article {
     @Column(name = "time", columnDefinition = "TIMESTAMP") // 명시적인 컬럼 정의
     private LocalDateTime time;
 
-    @Column(length = 50)
+    @Column(length = 100)
     private String stocks;
 
     @Column(length = 1000)
