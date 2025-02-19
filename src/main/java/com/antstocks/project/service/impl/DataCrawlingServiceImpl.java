@@ -44,6 +44,7 @@ public class DataCrawlingServiceImpl implements DataCrawlingService {
     }
 
     @Override
+    @Scheduled(fixedRate = 600000)
     public void parseHtml() {
 
             String sp500 [] = {"AAPL","NVDA","MSFT","GOOG","GOOGL","AMZN","META","TSLA","AVGO","BRK-B"};
